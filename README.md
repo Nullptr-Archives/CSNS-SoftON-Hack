@@ -1,8 +1,7 @@
 [![forthebadge](https://forthebadge.com/images/badges/designed-in-ms-paint.svg)](https://forthebadge.com)
-[![forthebadge](https://forthebadge.com/images/badges/gluten-free.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/reading-6th-grade-level.svg)](https://forthebadge.com)
 
-# Changelog (2021.03.07)
+# Changelog (2021.03.08)
 * Removed ESP features
 * Removed some protection techniques
 * Many pieces of the code are renewed and modernized
@@ -12,7 +11,7 @@
 ___
 # Project content
 ## Dependency graph
-![Dependency graph](https://github.com/Eugene-Golubev/multifile/blob/master/Dependency%20graph.png)
+![dependency graph](https://github.com/Eugene-Golubev/CSNS-SoftON-Hack/blob/main/images/dependency%20graph.png)
 
 ## 3rd-party data
 #### Half-Life 1 SDK
@@ -79,22 +78,22 @@ ___
 #### File Packer
 Console application to pack files into *.dat binary files. Application must be placed to directory with files to pack.
 
-![file-packer](https://github.com/Eugene-Golubev/multifile/blob/master/file-packer.png)
+![file packer](https://github.com/Eugene-Golubev/CSNS-SoftON-Hack/blob/main/images/file-packer.png)
 
 #### DLL
 The cheat itself. 
 
-![dll](https://github.com/Eugene-Golubev/multifile/blob/master/dll.jpg)
-![dll2](https://github.com/Eugene-Golubev/multifile/blob/master/dll2.jpg)
-![dll3](https://github.com/Eugene-Golubev/multifile/blob/master/dll3.jpg)
+![dll](https://github.com/Eugene-Golubev/CSNS-SoftON-Hack/blob/main/images/dll.jpg)
+![dll2](https://github.com/Eugene-Golubev/CSNS-SoftON-Hack/blob/main/images/dll2.jpg)
+![dll3](https://github.com/Eugene-Golubev/CSNS-SoftON-Hack/blob/main/images/dll3.jpg)
 
 #### Loader
 The cheat loader that receives data-files contain images and font used by loader & dll, then receives dll from server, and injects it to the game.
 
-![loader](https://github.com/Eugene-Golubev/multifile/blob/master/loader.png)
+![loader](https://github.com/Eugene-Golubev/CSNS-SoftON-Hack/blob/main/images/loader.png)
 ___
 # Client-Server relationship
-![server](https://github.com/Eugene-Golubev/multifile/blob/master/server.png)
+![server](https://github.com/Eugene-Golubev/CSNS-SoftON-Hack/blob/main/images/server.png)
 
 Firstly client-server uses two methods to protect transferred data:
 ### Encryption
