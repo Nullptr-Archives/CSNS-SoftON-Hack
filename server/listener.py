@@ -50,17 +50,25 @@ def str_xor(msg, key):
         i += 1
         j += 1
         if j >= len(key) : j = 0
+
     return output
 
 def process(tcp_server):
     db_conn = sqlite3.connect(DB_NAME)
     db_cur = db_conn.cursor()
 
-    try : conn, addr = tcp_server.sock.accept()
-    except socket.timeout: return
+    try: 
+        conn, addr = tcp_server.sock.accept()
+    except socket.timeout as e: 
+        if 'timed out' not in str(e):
+            print('Accept a connection:', e)
+        return
 
-    try : data = conn.recv(1024)
-    except : pass
+    try: 
+        data = conn.recv(1024)
+    except socket.error as e: 
+        print('Receive data:', e)
+        pass
 
     if data:
         # decode received data
@@ -99,7 +107,9 @@ def process(tcp_server):
                 try:
                     conn.send(str_xor(complete_header(info_header), private_key).encode())
                     conn.send(shuffle_array(bytearray(get_raw(LOADERDATA_NAME, 'rb')), file_size, rand_key))
-                except : pass
+                except socket.error as e: 
+                    print(e)
+                    pass
 
             # RETRIEVE SOFTON HACK INFORMATION
             if splitted[COMMAND]  == 'HackInfo':
@@ -109,7 +119,9 @@ def process(tcp_server):
                 try:
                     conn.send(str_xor(complete_header(info_header), private_key).encode())
                     conn.send(str_xor(get_raw(HACKINFO_NAME, 'r'), private_key).encode())
-                except : pass
+                except socket.error as e:
+                    print(e)
+                    pass
 
              # RETRIEVE DLL DATA FILE
             elif splitted[COMMAND] == 'DllData':
@@ -121,7 +133,9 @@ def process(tcp_server):
                 try:
                     conn.send(str_xor(complete_header(info_header), private_key).encode())
                     conn.send(shuffle_array(bytearray(get_raw(DLLDATA_NAME, 'rb')), data_size, rand_key))
-                except : pass
+                except socket.error as e:
+                    print(e)
+                    pass
 
             # RETRIEVE SOFTON HACK DLL
             elif splitted[COMMAND]  == 'ProcessDll':
@@ -142,8 +156,11 @@ def process(tcp_server):
 
                         response = 'rsp=Your license will expire at ' + expire_date.strftime('%Y-%m-%d %H:%M:%S') + ' (' + str(left_to_expire.days) + 'd ' + str(left_to_expire.seconds // 3600) + 'h' + ')' + '\n,'
                         
-                        try : conn.send(str_xor(complete_header(response), private_key).encode())
-                        except : pass
+                        try: 
+                            conn.send(str_xor(complete_header(response), private_key).encode())
+                        except socket.error as e: 
+                            print(e)
+                            pass
 
                         print('Sending dll to {}'.format(splitted[HWID]))
                         tcp_server.logger.info('Sending dll to %s' % (splitted[HWID])) 
@@ -153,22 +170,34 @@ def process(tcp_server):
 
                         info_header = 'dat=softon_hack,' + str(dll_size) + ',' + str(rand_key) + ','
 
-                        try : conn.send(str_xor(complete_header(info_header), private_key).encode())
-                        except : pass
+                        try: 
+                            conn.send(str_xor(complete_header(info_header), private_key).encode())
+                        except socket.error as e: 
+                            print(e)
+                            pass
 
-                        try : conn.send(array_shuffler.shuffle_array(bytearray(get_raw(DLL_NAME, 'rb')), dll_size, rand_key))
-                        except : pass
+                        try: 
+                            conn.send(array_shuffler.shuffle_array(bytearray(get_raw(DLL_NAME, 'rb')), dll_size, rand_key))
+                        except socket.error as e:
+                            print(e)
+                            pass
 
                     else:
                         response = 'rsp=License is expired\n,'
                         
-                        try : conn.send(str_xor(complete_header(response), private_key).encode())
-                        except: pass
+                        try: 
+                            conn.send(str_xor(complete_header(response), private_key).encode())
+                        except socket.error as e: 
+                            print(e)
+                            pass
 
                         db_cur.execute('DELETE FROM Subscriber WHERE hwid = ( ? )', (splitted[HWID], ))
                 else:
-                    try : conn.send(str_xor(complete_header('rsp=License is expired or not yet valid\n,'), private_key).encode())
-                    except : pass
+                    try: 
+                        conn.send(str_xor(complete_header('rsp=License is expired or not yet valid\n,'), private_key).encode())
+                    except socket.error as e:
+                        print(e)
+                        pass
 
             # SEND SOFTON HACK PLAYER INFO
             elif splitted[COMMAND] == 'DllAuth':
@@ -179,8 +208,11 @@ def process(tcp_server):
                 res = db_cur.fetchone()
                 info_header = 'cmd=terminate,' if not res else 'cmd=pass,'
                 
-                try : conn.send(str_xor(complete_header(info_header), private_key).encode())
-                except : pass
+                try: 
+                    conn.send(str_xor(complete_header(info_header), private_key).encode())
+                except socket.error as e:
+                    print(e)
+                    pass
 
                 if not res:
                     print('{} will be dropped from the game'.format(splitted[HWID]))
@@ -195,7 +227,7 @@ def process(tcp_server):
                         tcp_server.logger.info('Adding new user - %s' % (splitted[NICKNAME]) )
 
                         db_cur.execute('INSERT INTO SN_User (hwid, nickname) VALUES (?, ?)', (splitted[HWID], splitted[NICKNAME]) )
-
+						
     conn.close()
     db_conn.commit()
     db_conn.close()

@@ -37,7 +37,13 @@ class TcpServer(Thread):
 
     def run(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock.bind((IP, PORT))
+
+        try:
+            self.sock.bind((IP, PORT))
+        except socket.error as e:
+            print('Bind address:', e)
+            return
+
         self.sock.setblocking(0)
         self.sock.settimeout(5)
         self.sock.listen(3)
@@ -55,7 +61,7 @@ if __name__ == "__main__":
     tcp_server.start()
     is_running = True
 
-    print("SoftON SERVER")
+    print("SoftON Server")
     print("--------------------------------------")
     print("help : hack commands")
     print("q    : quit server")
@@ -63,7 +69,7 @@ if __name__ == "__main__":
 
     # a kind of retrograd method to work with users database - console commands
     while is_running:
-        cmd = input("cmd > ")
+        cmd = input('')
 
         if cmd == 'help' : cmd_interpreter.help()
         elif cmd == 'users' : cmd_interpreter.users()
@@ -77,3 +83,4 @@ if __name__ == "__main__":
             print("Shutting down server...")
             tcp_server.is_listening = False
             is_running = False
+        else: print('Unknown command')

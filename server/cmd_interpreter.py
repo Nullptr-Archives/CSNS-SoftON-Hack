@@ -12,10 +12,10 @@ def help():
     print(
 '''
 users     - get users info
-expire    - get date when all licences will expire
+expire    - expiration date of all licenses
 add       - add user
-remove    - remove user
-update    - update user license
+remove    - remove user's license
+update    - update user's license
 updateall - update licenses of all users
 comment   - add or change comment to user
 ''')
@@ -30,6 +30,7 @@ def users():
         expire_time = datetime.datetime.strptime(subs[i][EXPIRE_DATE], '%Y-%m-%d %H:%M:%S')
         now_time = datetime.datetime.now()
         left_time = (expire_time - now_time)
+
         print('{}. {} - {} ({}d {}h): {}'.format(i + 1, subs[i][HWID], subs[i][EXPIRE_DATE], left_time.days, left_time.seconds // 3600, subs[i][COMMENT]))
 
     db_conn.close()
@@ -44,6 +45,7 @@ def expire():
         expire_time = datetime.datetime.strptime(expire_sub[EXPIRE_DATE], '%Y-%m-%d %H:%M:%S')
         now_time = datetime.datetime.now()
         left_time = (expire_time - now_time)
+
         print('Last license will expire:')
         print('{} - {} ({}d {}h): {}'.format(expire_sub[HWID], expire_sub[EXPIRE_DATE], left_time.days, left_time.seconds // 3600, expire_sub[COMMENT]))
 
@@ -61,12 +63,14 @@ def update():
         expire_time = datetime.datetime.strptime(user[EXPIRE_DATE], '%Y-%m-%d %H:%M:%S')
         now_time = datetime.datetime.now()
         left_time = (expire_time - now_time)
+
         print('\nUser info:')
         print('{} - {} ({}d {}h): {}'.format(user[HWID], user[EXPIRE_DATE], left_time.days, left_time.seconds // 3600, user[COMMENT]))
 
         days_cnt = int(input('\nEnter number of days to add (negative number for removing):\n> '))
         new_expire_time = expire_time + datetime.timedelta(days=days_cnt)
         new_left_time = (new_expire_time - now_time)
+        
         print('\nYou are goind to {} {} days {} {} user license. New count day will be {} ({}d {}h)'.format("add" if days_cnt > 0 else "remove", abs(days_cnt), "to" if days_cnt > 0 else "from", user[HWID], new_expire_time, new_left_time.days, new_left_time.seconds // 3600))
 
         while True:
@@ -79,6 +83,7 @@ def update():
                 new_expire_time = datetime.datetime.strptime(new_user[EXPIRE_DATE], '%Y-%m-%d %H:%M:%S')
                 new_now_time = datetime.datetime.now()
                 new_left_time = (new_expire_time - new_now_time)
+
                 print('\nOperation complete. Updated user info:')
                 print('{} - {} ({}d {}h): {}'.format(new_user[HWID], new_user[EXPIRE_DATE], new_left_time.days, new_left_time.seconds // 3600, new_user[COMMENT]))
 
@@ -135,11 +140,13 @@ def add():
 
     user_hwid = input('\nEnter user HWID to add:\n> ')
     db_cur.execute('SELECT * FROM Subscriber WHERE hwid = ( ? )', (user_hwid,))
+
     already_exists = db_cur.fetchone()
     if already_exists:
         expire_time = datetime.datetime.strptime(already_exists[EXPIRE_DATE], '%Y-%m-%d %H:%M:%S')
         now_time = datetime.datetime.now()
         left_time = (expire_time - now_time)
+
         print('\nUser already exists:')
         print('{} - {} ({}d {}h): {}'.format(already_exists[HWID], already_exists[EXPIRE_DATE], left_time.days, left_time.seconds // 3600, already_exists[COMMENT]))
     else:
@@ -150,6 +157,7 @@ def add():
         left_time = expire_time - now_time
 
         comment = input('\nEnter a comment:\n> ')
+
         print('\nCheck the correctness of the entered data:')
         print('{} - {} ({}d {}h): {}'.format(user_hwid, expire_time_str, left_time.days, left_time.seconds // 3600, comment))
 
@@ -158,17 +166,17 @@ def add():
             confirm = input('\nConfirm operation?[Yes/No]\n> ')
 
             if confirm == 'Yes':
-                db_cur.execute('INSERT INTO Subscriber (hwid, expire, comment) VALUES ( ?, ?, ? )', (user_hwid, expire_time_str, comment))
-
-                db_cur.execute('SELECT * FROM Subscriber WHERE hwid = ( ? ) LIMIT 1', (user_hwid,))
+                db_cur.execute('INSERT INTO Subscriber (hwid, expire, comment) VALUES ( ?, ?, ? )', (user_hwid, expire_time_str, comment) )
+                db_cur.execute('SELECT * FROM Subscriber WHERE hwid = ( ? ) LIMIT 1', (user_hwid,) )
+               
                 is_ok = db_cur.fetchone()
                 if is_ok:
                     expire_time = datetime.datetime.strptime(is_ok[EXPIRE_DATE], '%Y-%m-%d %H:%M:%S')
                     now_time = datetime.datetime.now()
                     left_time = (expire_time - now_time)
+
                     print('\nUser added succesfully:')
                     print('{} - {} ({}d {}h): {}'.format(is_ok[HWID], is_ok[EXPIRE_DATE], left_time.days, left_time.seconds // 3600, is_ok[COMMENT]))
-
                     sn_logger.info('''
 Added %s - %s (%id %ih): %s
 ''' % (is_ok[HWID], is_ok[EXPIRE_DATE], left_time.days, left_time.seconds // 3600, is_ok[COMMENT]))
@@ -196,6 +204,7 @@ def remove():
         expire_time = datetime.datetime.strptime(user_exists[EXPIRE_DATE], '%Y-%m-%d %H:%M:%S')
         now_time = datetime.datetime.now()
         left_time = (expire_time - now_time)
+
         print('\nUser info:')
         print('{} - {} ({}d {}h): {}'.format(user_exists[HWID], user_exists[EXPIRE_DATE], left_time.days, left_time.seconds // 3600, user_exists[COMMENT]))
 
@@ -235,16 +244,16 @@ def comment():
 
             if confirm == 'Yes':
                 db_cur.execute('UPDATE Subscriber SET comment = ( ? ) WHERE hwid = ( ? )', (new_comment, user_hwid))
-
                 db_cur.execute('SELECT * FROM Subscriber WHERE hwid = ( ? )', (user_hwid, ))
+
                 updated_user = db_cur.fetchone()
                 if updated_user:
                     expire_time = datetime.datetime.strptime(updated_user[1], '%Y-%m-%d %H:%M:%S')
                     now_time = datetime.datetime.now()
                     left_time = (expire_time - now_time)
+
                     print('\nUpdated user info:')
                     print('{} - {} ({}d {}h): {}'.format(updated_user[HWID], updated_user[EXPIRE_DATE], left_time.days, left_time.seconds // 3600, updated_user[COMMENT]))
-
                     sn_logger.info('''
 Updated %s comment:
 From: %s
