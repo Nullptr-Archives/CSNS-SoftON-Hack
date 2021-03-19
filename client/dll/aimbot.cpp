@@ -7,10 +7,10 @@
 const size_t NO_TARGET = 0;
 
 // function converts input vector to view angles
+// origin - Quake 1 source code:
+// https://github.com/id-Software/Quake/blob/bf4ac424ce754894ac8f1dae6a3981954bc9852d/QW/server/pr_cmds.c#L365
 //
-// I believe this function is originally reverse-engineered from a CS 1.6 
-// by old-days hackers from GameDeception,
-// but it also was slightly modified by me because of 
+// yet it has been slightly modified by me because of 
 // minor difference	of view angles representation between CS 1.6 and CSN:S
 void VectorAngles(const float* forward, float* angles) {
 	float tmp, yaw, pitch;

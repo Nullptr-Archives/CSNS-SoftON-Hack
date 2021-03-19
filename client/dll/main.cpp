@@ -154,7 +154,7 @@ void HackInit() {
 		hack_detector::AddHack("General", "General Hack");
 		hack_detector::AddHack("SoftON", "SoftON");
 		hack_detector::SetKey("bottomcolor");
-		hack_detector::SetSignature("SoftON");
+		hack_detector::SetSignature("SoftON [leaked]");
 
 		g::Engine.ClientCmd((char*)"cl_outline_tdm 0; developer 1; cl_shadows 0");
 		g::pEngine->PlaySoundByName((char*)"metalarena/occu.wav", 1);
