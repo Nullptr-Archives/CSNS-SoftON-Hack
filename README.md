@@ -1,13 +1,13 @@
 [![forthebadge](https://forthebadge.com/images/badges/designed-in-ms-paint.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/reading-6th-grade-level.svg)](https://forthebadge.com)
 
-# Changelog (2021.03.08)
-* Removed ESP features
-* Removed some protection techniques
-* Many pieces of the code are renewed and modernized
-* Hacker Detection is rewritten
-* Menu is renewed, performance increased
-* Updated available number of sprays for Spray Changer
+# Changelog (2021.03.19)
+* DLL: Empty signature is allowed to Hacker Detector, and allows be invisible to other SoftON users 
+* DLL: Players state updating moved from 'HUD_Redraw' to 'HUD_PostRunCmd'
+* Loader: Fixed leak of DLL bytes when it's received from server, and injected. Previously DLL bytes continued to store in memory (it's a fresh bug, honestly!)
+* Easy-Packer: whitespace-containing-files doesn't causes packing process termination, but such files are skipped
+* Easy-Packer: the check whether file is executable not by its extension, but by magic number ('MZ')
+* Small code and comments changes
 ___
 # Project content
 ## Dependency graph

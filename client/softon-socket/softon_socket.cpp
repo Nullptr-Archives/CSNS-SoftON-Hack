@@ -23,13 +23,7 @@ CSocket::CSocket() {
 }
 
 CSocket::~CSocket() {
-	int res = shutdown(this->socket, SD_SEND);
-	if (res == SOCKET_ERROR) {
-		closesocket(this->socket);
-		WSACleanup();
-		return;
-	}
-
+	shutdown(this->socket, SD_SEND);
 	closesocket(this->socket);
 	WSACleanup();
 }

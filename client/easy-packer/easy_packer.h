@@ -97,9 +97,12 @@ namespace easy_packer {
 		std::optional<std::vector<FileHeader>> explore_path();
 
 		// create header of binary-file using files list
-		std::optional<std::string> build_header(const std::vector<FileHeader>& files_list);
+		std::string build_header(const std::vector<FileHeader>& files_list);
 
-		// check if file processed by 'explore_path' is a binary file
+		// check if the file that processing by 'explore_path' is an executable file
+		bool is_executable(const std::string& filename) const;
+
+		// check if file that processing by 'explore_path' is a binary file
 		// with the same magic number as current class instance 
 		bool is_data_file(const std::string& filename) const;
 	};

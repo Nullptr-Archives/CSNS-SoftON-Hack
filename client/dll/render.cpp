@@ -22,11 +22,6 @@ void HUD() {
 
 		ImGui::Begin("###SoftONHUD", (bool*)1, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
 		{
-			// update players information
-			g::Local.update();
-			for (Player& player : g::Players)
-				player.update();
-
 			// if menu is drawn we also drawn barely visible background
 			if (menu::IsVisible())
 				ImGui::GetWindowDrawList()->AddRectFilled(ImVec2(0, 0), ImVec2(g::ScreenSize.x, g::ScreenSize.y), ImColor(0.f, 0.f, 0.f, 0.1f));

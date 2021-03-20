@@ -28,18 +28,14 @@ namespace easy_packer {
 
 		// build a header. continue only if there is no files containing
 		// whitespaces in them name
-		//
-		// todo: whitespace-contains-files should not be a reason to terminate pack process!
 		auto header = this->build_header(files_list.value());
-		if (!header.has_value())
-			return nullopt;
 
 		// open output binary file and write header into it
 		ofstream bin(
 			this->build_fullname().c_str(),
 			ios_base::binary
 		);
-		bin.write(header.value().c_str(), header.value().length());
+		bin.write(header.c_str(), header.length());
 
 		result.count = files_list.value().size();
 
@@ -107,11 +103,15 @@ namespace easy_packer {
 		for (const auto& entry : fs::directory_iterator(this->path_to)) {
 			// only regular files is processed
 			if (entry.is_regular_file()) {
-				const string entry_ext = entry.path().extension().string();
-				if (entry_ext == ".exe")
+				const string filename = entry.path().filename().string();
+
+				if (filename == "Thumbs.db")
 					continue;
 
-				if (entry_ext == ".dat" && this->is_data_file(entry.path().filename().string()))
+				if (this->is_executable(filename))
+					continue;
+
+				if (this->is_data_file(filename))
 					continue;
 
 				files_list.push_back(
@@ -131,7 +131,7 @@ namespace easy_packer {
 		return files_list;
 	}
 
-	optional<string> packer::build_header(const vector<FileHeader> & files_list) {
+	string packer::build_header(const vector<FileHeader>& files_list) {
 		stringstream ss;
 
 		ss.write(this->magic_number.c_str(), this->magic_number.length());
@@ -142,8 +142,8 @@ namespace easy_packer {
 
 		for (auto& [name, size] : files_list) {
 			if (name.find(' ') != name.npos) {
-				this->set_error("'" + name + "' contains a space in its name. Terminating...");
-				return nullopt;
+				this->set_error("'" + name + "' contains a space in its name. Skipping...");
+				continue;
 			}
 
 			ss << name << " " << size << " ";
@@ -152,12 +152,24 @@ namespace easy_packer {
 		return ss.str();
 	}
 
-	bool packer::is_data_file(const string & filename) const {
+	bool packer::is_executable(const string& filename) const {
+		ifstream tmp_file(filename.c_str(), ios_base::binary);
+
+		string file_magic(2, ' ');
+		tmp_file.read(file_magic.data(), file_magic.length());
+		tmp_file.close();
+
+		if (file_magic == "MZ")
+			return true;
+
+		return false;
+	}
+
+	bool packer::is_data_file(const string& filename) const {
 		ifstream tmp_file(filename.c_str(), ios_base::binary);
 
 		string file_magic(this->magic_number.length(), ' ');
 		tmp_file.read(file_magic.data(), file_magic.length());
-
 		tmp_file.close();
 
 		if (file_magic == this->magic_number)

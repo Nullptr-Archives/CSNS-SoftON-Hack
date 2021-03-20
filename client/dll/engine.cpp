@@ -78,6 +78,17 @@ int CL_CreateMove() {
 	return res;
 }
 
+int HUD_PostRunCmd() {
+	int res = g::Engine.HUD_PostRunCmd();
+
+	// update players information
+	g::Local.update();
+	for (auto& player : g::Players)
+		player.update();
+
+	return res;
+}
+
 // unfortunately since OpenGL-hooks are detected, 
 // we can't make NoSmoke using glBegin (who knows, he knows),
 // but we still can hook game event of creating smoke and control its execution
@@ -125,6 +136,7 @@ void HookEngine() {
 	g::pEngine->HUD_Frame = HUD_Frame;
 	g::pEngine->CL_CreateMove = CL_CreateMove;
 	g::pEngine->HUD_Redraw = HUD_Redraw;
+	g::pEngine->HUD_PostRunCmd = HUD_PostRunCmd;
 
 	pImpulse = hook::Command("impulse", Impulse);
 	pCreateSmoke = hook::Event("events/createsmoke.sc", CreateSmoke);

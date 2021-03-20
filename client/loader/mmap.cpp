@@ -89,15 +89,20 @@ DWORD __stdcall LibraryLoader(LPVOID Memory) {
 
 DWORD __stdcall stub() { return 0; }
 
-std::string MMAP(const std::string & process_name, unsigned char* raw) {
+std::string MMAP(const std::string& process_name, unsigned char* raw) {
+#define SAFE_RET(msg) { \
+	delete[] raw; \
+	return msg; \
+	}
+
 	if (!raw)
-		return "RAW is broken";
+		SAFE_RET("RAW is broken");
 
 	HANDLE hProc = 0;
 	DWORD pID = utils::PIDByName(process_name.c_str());
 	hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pID);
 	if (!hProc)
-		return "Failed to open game process";
+		SAFE_RET("Failed to open game process");
 
 	loaderdata LoaderParams;
 
@@ -114,7 +119,7 @@ std::string MMAP(const std::string & process_name, unsigned char* raw) {
 	int is_ok = WriteProcessMemory(hProc, ExecutableImage, raw,
 		pNtHeaders->OptionalHeader.SizeOfHeaders, NULL);
 	if (is_ok == 0)
-		return "Failed to copy the headers to game process memory";
+		SAFE_RET("Failed to copy the headers to game process memory");
 
 	// Target Dll's Section Header
 	PIMAGE_SECTION_HEADER pSectHeader = (PIMAGE_SECTION_HEADER)(pNtHeaders + 1);
@@ -123,14 +128,14 @@ std::string MMAP(const std::string & process_name, unsigned char* raw) {
 		is_ok = WriteProcessMemory(hProc, (PVOID)((LPBYTE)ExecutableImage + pSectHeader[i].VirtualAddress),
 			(PVOID)((LPBYTE)raw + pSectHeader[i].PointerToRawData), pSectHeader[i].SizeOfRawData, NULL);
 		if (is_ok == 0)
-			return "Failed to copy section of the dll to game process memory";
+			SAFE_RET("Failed to copy section of the dll to game process memory");
 	}
 
 	// Allocating memory for the loader code.
 	PVOID LoaderMemory = VirtualAllocEx(hProc, NULL, 4096, MEM_COMMIT | MEM_RESERVE,
 		PAGE_EXECUTE_READWRITE); // Allocate memory for the loader code
 	if (LoaderMemory == 0)
-		return "Failed to allocate memory in game process";
+		SAFE_RET("Failed to allocate memory in game process");
 
 	LoaderParams.ImageBase = ExecutableImage;
 	LoaderParams.NtHeaders = (PIMAGE_NT_HEADERS)((LPBYTE)ExecutableImage + pDosHeader->e_lfanew);
@@ -147,26 +152,26 @@ std::string MMAP(const std::string & process_name, unsigned char* raw) {
 	is_ok = WriteProcessMemory(hProc, LoaderMemory, &LoaderParams, sizeof(loaderdata),
 		NULL);
 	if (is_ok == 0)
-		return "Failed to write loader information to game process memory";
+		SAFE_RET("Failed to write loader information to game process memory");
 
 	// Write the loader code to target process
 	is_ok = WriteProcessMemory(hProc, (PVOID)((loaderdata*)LoaderMemory + 1), LibraryLoader,
 		(DWORD)stub - (DWORD)LibraryLoader, NULL);
 	if (is_ok == 0)
-		return "Failed to write the loader code to game process memory";
+		SAFE_RET("Failed to write the loader code to game process memory");
 
 	// Create a remote thread to execute the loader code
 	HANDLE hThread = CreateRemoteThread(hProc, NULL, 0, (LPTHREAD_START_ROUTINE)((loaderdata*)LoaderMemory + 1),
 		LoaderMemory, 0, NULL);
 	if (hThread == 0)
-		return "Fail to create remote thread";
+		SAFE_RET("Fail to create remote thread");
 
 	WaitForSingleObject(hThread, INFINITE);
 	CloseHandle(hThread);
 	CloseHandle(hProc);
 
 	if (GetLastError())
-		return "Hack might be injected, but something went wrong during the injection";
+		SAFE_RET("Hack might be injected, but something went wrong during the injection")
 	else
-		return "Injected successfully";
+		SAFE_RET("Injected successfully");
 }

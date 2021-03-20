@@ -15,11 +15,6 @@ namespace hack_detector {
 			utils::Warning("Key for hack detector isn't set. Setting 'bottomcolor'...");
 			key_for_store = "bottomcolor";
 		}
-
-		if (signature.empty()) {
-			utils::Warning("Signature for hack detector isn't set. Setting 'SoftON Hack [leaked]'...");
-			signature = "SoftON Hack [leaked]";
-		}
 	}
 
 	void AddHack(const std::string& name, const std::string& key) {

@@ -88,6 +88,8 @@ void RetrieveData(std::string& resp) {
 		ofs.write((const char*)data_file, sock.get_last_listen_size());
 		ofs.close();
 
+		delete[] data_file;
+
 		sock.disconnect();
 	}
 }
